@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"time"
 
-	"transport-backend/internal/httpx"
-	"transport-backend/internal/routes"
-	"transport-backend/internal/trips"
+	"transport-backend/pkg/httpx"
+	"transport-backend/pkg/routes"
+	"transport-backend/pkg/trips"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"

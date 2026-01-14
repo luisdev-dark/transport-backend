@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"regexp"
 
-	"transport-backend/internal/db"
-	"transport-backend/internal/httpx"
-	"transport-backend/internal/models"
+	"transport-backend/pkg/db"
+	"transport-backend/pkg/httpx"
+	"transport-backend/pkg/models"
 
 	"github.com/go-chi/chi/v5"
 )

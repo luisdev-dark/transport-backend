@@ -35,7 +35,7 @@ Backend MVP en Go para aplicación de transporte con rutas fijas A→B y paradas
 ```
 ├── api/
 │   └── index.go          # Entry point Vercel (Handler function)
-├── internal/
+├── pkg/
 │   ├── db/
 │   │   └── db.go         # Pool singleton pgxpool serverless-friendly
 │   ├── httpx/
