@@ -5,6 +5,7 @@
 *.so
 *.dylib
 transport-backend
+main
 
 # Test binary
 *.test
@@ -23,6 +24,16 @@ go.work
 .vscode/
 *.swp
 *.swo
+
+# Replit
+.replit
+.config/
+.local/
+replit.md
+replit.nix
+
+# Attached assets (contexto temporal)
+attached_assets/
 
 # OS
 .DS_Store
