@@ -1,0 +1,170 @@
+Backend MVP en Go para app de transporte con rutas fijas A→B y paradas intermedias.
+
+NO es Uber.
+
+Stack:
+- Go 1.21
+- Chi router
+- Postgres (Neon)
+- pgxpool
+- Deploy en Vercel (Go serverless)
+- API REST JSON
+- Frontend Expo (TypeScript)
+
+Restricciones:
+- Sin auth real (user_id hardcodeado)
+- Sin pagos online
+- Sin tracking en tiempo real
+- Sin microservicios
+- MVP primero
+
+Endpoints públicos (prefijo /api lo pone Vercel):
+- GET /health
+- GET /routes
+- GET /routes/{id}
+- POST /trips
+- GET /trips/{id}
+
+Reglas:
+- NO usar prefijo /api dentro del router
+- Usar r.Context() en handlers
+- payment_method permitido: cash | yape | plin
+- JSON siempre
+🧱 PROMPTS BACKEND (repo backend/)
+1️⃣ api/index.go — Entry point Vercel (router limpio)
+text
+Copiar código
+Actualiza api/index.go para Vercel Go Runtime.
+
+Requisitos:
+- Exportar func Handler(w http.ResponseWriter, r *http.Request)
+- NO usar prefijo "/api" dentro del chi router
+- Rutas internas:
+  GET /health
+  GET /routes
+  GET /routes/{id}
+  POST /trips
+  GET /trips/{id}
+
+Middleware:
+- logger simple
+- CORS abierto (*)
+
+Importante:
+- Usar r.Context() para pasar contexto a handlers
+- Delegar lógica a internal/routes y internal/trips
+- Responder JSON usando internal/httpx
+
+Devuélveme el archivo completo listo para deploy.
+2️⃣ internal/db/db.go — Pool serverless-friendly
+text
+Copiar código
+Revisa y mejora internal/db/db.go.
+
+Objetivo:
+- Mantener singleton pgxpool para Neon
+- Inicialización lazy (sync.Once)
+- Leer DATABASE_URL desde env
+- Requerir SSL (sslmode=require)
+- Usar context.Context recibido desde handlers
+- NO panic: devolver error claro si DATABASE_URL no existe
+
+Agregar:
+- Timeout razonable para ping inicial
+- Comentarios explicando serverless + cold starts
+3️⃣ internal/httpx/respond.go — Respuestas estándar
+text
+Copiar código
+Revisa internal/httpx/respond.go.
+
+Requisitos:
+- JSON(w, status, payload)
+- Error(w, status, message)
+- Siempre Content-Type application/json
+- Manejar errores de encoding
+- Formato error: { "error": "mensaje" }
+
+Mantener simple, MVP.
+4️⃣ internal/models/models.go — Modelos consistentes
+text
+Copiar código
+Revisa internal/models/models.go.
+
+Asegura que:
+- UUIDs sean string
+- paymentMethod sea string ("cash" | "yape" | "plin")
+- Campos usen snake_case en JSON tags
+- created_at y updated_at estén presentes donde aplique
+
+No agregues modelos extra.
+5️⃣ internal/routes/handlers.go — Routes handlers
+text
+Copiar código
+Revisa internal/routes/handlers.go.
+
+Mejoras requeridas:
+- Usar r.Context() en todas las queries
+- Validar UUID básico (si falla, devolver 400)
+- GET /routes:
+  - devolver id, name, origin_name, destination_name, base_price_cents, currency
+- GET /routes/{id}:
+  - devolver route + stops ordenados por stop_order
+- Si no existe la ruta: 404 con JSON error
+
+No agregar auth.
+6️⃣ internal/trips/handlers.go — Trips handlers (MVP sólido)
+text
+Copiar código
+Revisa internal/trips/handlers.go.
+
+Cambios requeridos:
+- Usar r.Context() en todas las queries
+- HardcodedPassengerID constante (comentada como MVP)
+- payment_method permitido solo: cash, yape, plin
+- pickup_stop_id y dropoff_stop_id:
+  - pueden ser null
+  - no pueden ser iguales si ambos existen
+- status inicial siempre "requested"
+
+Errores:
+- 400 input inválido
+- 404 trip no existe
+- 500 error DB
+
+Devuélveme el archivo completo.
+7️⃣ sql/schema.sql — Enum de pagos correcto
+text
+Copiar código
+Revisa sql/schema.sql.
+
+Asegura:
+- Enum payment_method contiene:
+  - cash
+  - yape
+  - plin
+- NO incluir "pling"
+- El resto del schema queda igual (tablas, triggers, índices)
+8️⃣ sql/seed.sql — Seed consistente
+text
+Copiar código
+Revisa sql/seed.sql.
+
+Requisitos:
+- Usuario passenger UUID:
+  11111111-1111-1111-1111-111111111111
+- Ruta 1 UUID:
+  22222222-2222-2222-2222-222222222222
+- Ruta 2 UUID:
+  33333333-3333-3333-3333-333333333333
+- Stops con UUIDs fijos y stop_order correcto
+- Comentarios indicando qué UUID es qué
+9️⃣ vercel.json — Config mínima correcta
+text
+Copiar código
+Revisa vercel.json.
+
+Requisitos:
+- Runtime Go 1.21
+- Rutas /api/* apuntan a api/index.go
+- Sin rewrites innecesarios
+Devuélveme el archivo completo.
